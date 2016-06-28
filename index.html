@@ -1,32 +1,56 @@
 <!doctype html>
-<html class="no-js" lang="">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="x-ua-compatible" content="ie=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+<body>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
 
-        <link rel="apple-touch-icon" href="apple-touch-icon.png">
-        <!-- Place favicon.ico in the root directory -->
+<script id="movie-template" type="text/x-handlebars-template">
+  <div class="entry">
+    <h3>{{Title}} ({{Year}})</h3>
+  </div>
+  <div class="body">
+    <p>{{Plot}}</p>
+  </div>
+</script>
+  <br>
+  <input type="text" name="movieName" id="searchInfo"><br>
+  <input type="submit" value="Time to Search!" id="search">
+  <input type="submit" value="Clear" id="clear">
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
-        <link rel="stylesheet" href="css/styles.css">
-    </head>
+<script>
+$( "#search" ).click(function() {
+//Execute the action
+$("h3").empty();
+$("p").empty();
+var movieSearch = $( "#searchInfo" ).val();
+$.get('http://www.omdbapi.com/?s=' + movieSearch, function(data) { //function(data) shows that some data is going to be used as a function. this initially fetches the data
+  //console.log(data.Search.length);
+  for (var i = 0, Search = data.Search.length; i < Search; i++) {
+  //  console.log(data.Search[i].imdbID);
+    $.get('http://www.omdbapi.com/?i=' + data.Search[i].imdbID, function(data) {
+      var source   = $("#movie-template").html(); //this line prepares the movie-template to be used in Handlebars
+      var template = Handlebars.compile(source); // this line compiles the raw html into the usable html using Handblebars
+      var html     = template(data);  //This line lets  Handlebars compile the raw JSON data into usable data
+      $("#movie-results").append(html);
+    });
+    /*var source   = $("#movie-template").html();
+    var template = Handlebars.compile(source);
+    var html     = template(data.Search[i]);
+    $("#movie-results").append(html);*/
+  }
+});
+});
+</script>
 
-    <body>
-        <div class="container">
-            <div class="form-group">
-                <label for="MovieSearch">Movies</label>
-                <input type="text" class="form-control" id="MovieSearch" placeholder="Search for movie">
-            </div>
+<script>
+$( "#clear" ).click(function() {
+$('#searchInfo').val('');
+$("h3").empty();
+$("p").empty();
+});
+</script>
 
-            <button class="btn btn-primary" id="SearchButton">Search for Movies</button>
-        </div>
+<div id="movie-results"></div>
 
-        <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
-        <script src="js/main.js"></script>
-    </body>
+</body>
 </html>
